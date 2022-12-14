@@ -1,0 +1,74 @@
+```{r}
+# gasto e notas (panel data)
+library(fixest)
+```
+
+```{r}
+ 
+dados = read.csv("educ_saeb_gasto_2013-2015.csv")
+dados = dados[complete.cases(dados),]
+sum(is.na(dados)) # 0 
+
+LP5 =  feols(log(X5LP_SAEB) ~ log(gasto_fund) + log(salario_medio) + log(salario_medio_pad) + 
+               log(media_aluno_turma) + log(abandono+1) + log(aprovacao+1) +
+            log(MIRD) + log(superior +1) + log(afd1+1) + log(afd2+1) + log(afd3+1) + log(afd4+1) +
+            log(gestao.1+1) + log(gestao.2+1) + log(gestao.3+1) + log(gestao.4+1) + log(gestao.5+1)
+            | municipio + ano, data = dados)
+
+LP9 =  feols(log(X9LP_SAEB) ~ log(gasto_fund) + log(salario_medio) + log(salario_medio_pad) +
+               log(media_aluno_turma) + log(abandono+1) + log(aprovacao+1) +
+            log(MIRD) + log(superior +1) + log(afd1+1) + log(afd2+1) + log(afd3+1) + log(afd4+1) +
+            log(gestao.1+1) + log(gestao.2+1) + log(gestao.3+1) + log(gestao.4+1) + log(gestao.5+1)
+            | municipio + ano, data = dados)
+
+MT5 =  feols(log(X5MT_SAEB) ~ log(gasto_fund) + log(salario_medio) + log(salario_medio_pad) +
+               log(media_aluno_turma) + log(abandono+1) + log(aprovacao+1) +
+            log(MIRD) + log(superior +1) + log(afd1+1) + log(afd2+1) + log(afd3+1) + log(afd4+1) +
+            log(gestao.1+1) + log(gestao.2+1) + log(gestao.3+1) + log(gestao.4+1) + log(gestao.5+1)
+            | municipio + ano, data = dados)
+
+MT9 =  feols(log(X9MT_SAEB) ~ log(gasto_fund) + log(salario_medio) + log(salario_medio_pad) +
+               log(media_aluno_turma) + log(abandono+1) + log(aprovacao+1) +
+            log(MIRD) + log(superior +1) + log(afd1+1) + log(afd2+1) + log(afd3+1) + log(afd4+1) +
+            log(gestao.1+1) + log(gestao.2+1) + log(gestao.3+1) + log(gestao.4+1) + log(gestao.5+1)
+            | municipio + ano, data = dados)
+
+soma =  feols((log(X5LP_SAEB+X9LP_SAEB+X5MT_SAEB+X9MT_SAEB/4)) ~ log(gasto_fund) + 
+                log(salario_medio) + log(salario_medio_pad) +
+                log(media_aluno_turma) + log(abandono+1) + log(aprovacao+1) +
+            log(MIRD) + log(superior +1) + log(afd1+1) + log(afd2+1) + log(afd3+1) + log(afd4+1) +
+            log(gestao.1+1) + log(gestao.2+1) + log(gestao.3+1) + log(gestao.4+1) + log(gestao.5+1)
+            | municipio + ano, data = dados)
+
+etable(LP5, LP9, MT5, MT9, soma, tex = TRUE, vcov = ~municipio)
+
+```
+
+```{r}
+library(ggplot2)
+library(patchwork)
+
+plot(y = log(dados$X9MT_SAEB), x = log(dados$gasto_fund))
+
+g1 = ggplot(dados, aes(x = log(X5LP_SAEB), y = log(gasto_fund))) +
+  geom_point() + labs(x = "log(LP5)", y = "log(Gasto Per Capita)")
+
+g2 = ggplot(dados, aes(x = log(X9LP_SAEB), y = log(gasto_fund))) +
+  geom_point() + labs(x = "log(LP9)", y = "log(Gasto Per Capita)")
+
+g3 = ggplot(dados, aes(x = log(X5MT_SAEB), y = log(gasto_fund))) +
+  geom_point() + labs(x = "log(MT5)", y = "log(Gasto Per Capita)")
+
+g4 = ggplot(dados, aes(x = log(X9MT_SAEB), y = log(gasto_fund))) +
+  geom_point() + labs(x = "log(MT9)", y = "log(Gasto Per Capita)")
+
+(g1 | g2 ) / (g3 | g4)
+ggsave("notas-gasto.png", dpi = 1000)
+
+```
+
+
+
+
+
+
